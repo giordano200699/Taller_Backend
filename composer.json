@@ -1,0 +1,18 @@
+{
+	"description": "Modulo Estadisticas SIGA",
+	"name": "back-estadisticas",
+	"type": "project",
+	"homepage": "https://back-estadisticas.herokuapp.com/",
+	"license": "MIT",
+	"require": {
+		"php": ">=5.3.7",
+		"chriskacerguis/codeigniter-restserver": "^3.0"
+	},
+	"suggest": {
+		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
+	},
+	"require-dev": {
+		"mikey179/vfsStream": "1.1.*",
+		"phpunit/phpunit": "4.* || 5.*"
+	}
+}
