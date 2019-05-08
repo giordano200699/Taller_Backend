@@ -477,6 +477,42 @@ class Pago extends CI_Model
         //return $this->formatoConceptos($data);
     }
 
+    public function listarDemandaSocial(){
+        
+        $query = $this->db->query("SELECT programa.sigla_programa, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 GROUP BY anio_ingreso, programa.sigla_programa ORDER BY programa.sigla_programa,anio_ingreso"
+        );
+        $data = $query->result_array();
+
+        $nombre = $data[0]["sigla_programa"];
+        $resultado[] = array();
+        $programaArray = [];
+
+        for($i=2002;$i<=2018;$i++){
+            $nuevoArray["$i"] = 0;
+            
+        }
+
+        foreach($data as $fila){
+            if($fila["sigla_programa"] == $nombre){
+
+                $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
+                
+                //$resultado["sigla_programa"]
+            }else{
+                $programaArray[$nombre] = $nuevoArray;
+                for($i=2002;$i<=2018;$i++){
+                    $nuevoArray["$i"] = 0;
+                }
+                $nombre = $fila["sigla_programa"];
+                $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
+            }
+        }
+        $programaArray[$nombre] = $nuevoArray;
+
+        return $programaArray;                
+
+   }
+
 }
 
 
