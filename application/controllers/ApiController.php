@@ -131,6 +131,10 @@ class ApiController extends REST_Controller {
             $array_out = $this->pago->listarPoblacionEstudiantil();
             echo json_encode($array_out);
         }
+        public function poblacionDocente_get(){
+            $array_out = $this->pago->listarPoblacionDocente();
+            echo json_encode($array_out);
+        }
 
         public function cantidadPorPeriodoAnio_get(){
             $yearStart = $this->get("year_inicio");
