@@ -513,6 +513,13 @@ class Pago extends CI_Model
 
    }
 
+   public function listarRelacionAlumnos(){
+    //SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm);
+        $query = $this->db->query("SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm)");
+        $data = $query->result_array();
+        return $data;
+   }
+
 }
 
 
