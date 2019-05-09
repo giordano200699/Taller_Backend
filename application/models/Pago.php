@@ -520,6 +520,14 @@ class Pago extends CI_Model
         return $data;
    }
 
+   
+   public function listarPoblacionEstudiantil(){
+    //SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm);
+        $query = $this->db->query("SELECT anio_ingreso,count(*) from alumno_programa GROUP BY(anio_ingreso) ORDER BY(anio_ingreso)");
+        $data = $query->result_array();
+        return $data;
+   }
+
 }
 
 
