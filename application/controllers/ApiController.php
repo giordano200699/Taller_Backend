@@ -120,8 +120,14 @@ class ApiController extends REST_Controller {
         }
 
         public function demandaSocial_get(){
-            $array_out = $this->pago->listarDemandaSocial();
-            echo json_encode($array_out);
+            $fecha_inicio = $this->get("fecha_inicio");
+            $fecha_fin = $this->get("fecha_fin");
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarDemandaSocial($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
         }
         public function relacionAlumnos_get(){
             $array_out = $this->pago->listarRelacionAlumnos();

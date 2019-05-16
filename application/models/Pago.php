@@ -477,37 +477,44 @@ class Pago extends CI_Model
         //return $this->formatoConceptos($data);
     }
 
-    public function listarDemandaSocial(){
+    public function listarDemandaSocial($fecha_inicio, $fecha_fin){
+
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
         
-        $query = $this->db->query("SELECT programa.sigla_programa, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 GROUP BY anio_ingreso, programa.sigla_programa ORDER BY programa.sigla_programa,anio_ingreso"
+        $query = $this->db->query("SELECT programa.sigla_programa, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, programa.sigla_programa ORDER BY programa.sigla_programa,anio_ingreso"
         );
         $data = $query->result_array();
-
-        $nombre = $data[0]["sigla_programa"];
-        $resultado[] = array();
         $programaArray = [];
 
-        for($i=2002;$i<=2018;$i++){
-            $nuevoArray["$i"] = 0;
+        if($data){
+            $nombre = $data[0]["sigla_programa"];
+            $resultado[] = array();
             
-        }
 
-        foreach($data as $fila){
-            if($fila["sigla_programa"] == $nombre){
-
-                $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
+            for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                $nuevoArray["$i"] = 0;
                 
-                //$resultado["sigla_programa"]
-            }else{
-                $programaArray[$nombre] = $nuevoArray;
-                for($i=2002;$i<=2018;$i++){
-                    $nuevoArray["$i"] = 0;
-                }
-                $nombre = $fila["sigla_programa"];
-                $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
             }
+
+            foreach($data as $fila){
+                if($fila["sigla_programa"] == $nombre){
+
+                    $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
+                    
+                    //$resultado["sigla_programa"]
+                }else{
+                    $programaArray[$nombre] = $nuevoArray;
+                    for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                        $nuevoArray["$i"] = 0;
+                    }
+                    $nombre = $fila["sigla_programa"];
+                    $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
+                }
+            }
+            $programaArray[$nombre] = $nuevoArray;
         }
-        $programaArray[$nombre] = $nuevoArray;
+        
 
         return $programaArray;                
 
