@@ -106,22 +106,17 @@ class ApiController extends REST_Controller {
 
         //cambios diego
         public function listaConceptos_get(){
-            //echo("Hola Mundo");
             //$array_out = $this->pago->listarConceptos();
-            $array_out = $this->pago->listarProgramaXAnios();
             //echo(count($array_out));
-            //echo($array_out[0]["sigla_programa"]." - ".$array_out[0]["anio_ingreso"]." - ".$array_out[0]["count"]);
-            // $a1 = array('conceptos'=>array());
-            //         $a1['conceptos'][] = 'giordano';
-            //         $a1['conceptos'][] = 'gabriel';
-            //echo($a1);
-            //$array_out
-            echo json_encode($array_out);
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarProgramaXAnios($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
         }
 
         public function demandaSocial_get(){
-            $fecha_inicio = $this->get("fecha_inicio");
-            $fecha_fin = $this->get("fecha_fin");
             if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
                 $array_out = $this->pago->listarDemandaSocial($this->get("fecha_inicio"),$this->get("fecha_fin"));
                 echo json_encode($array_out);

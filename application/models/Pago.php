@@ -414,8 +414,11 @@ class Pago extends CI_Model
         return $array_out;
     }
 
-    public function listarProgramaXAnios(){
-        $query = $this->db->query("SELECT anio_ingreso,programa.sigla_programa, count(*) FROM alumno_programa inner join programa on alumno_programa.id_programa=programa.id_programa GROUP BY anio_ingreso,programa.id_programa ORDER BY anio_ingreso,programa.id_programa;"
+    public function listarProgramaXAnios($fecha_inicio, $fecha_fin){
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT anio_ingreso,programa.sigla_programa, count(*) FROM alumno_programa inner join programa on alumno_programa.id_programa=programa.id_programa WHERE anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso,programa.id_programa ORDER BY anio_ingreso,programa.id_programa;"
         );
         $data = $query->result_array();
 
@@ -427,52 +430,44 @@ class Pago extends CI_Model
 
         foreach($data2 as $fila){
             $datoAnio[$fila['sigla_programa']] = 0;
-        }
-                
-
-
-        
-        
-        
+        }        
 
         $respuesta = array();
-        $anio = $data[0]['anio_ingreso'];
+        if($data){
+            $anio = $data[0]['anio_ingreso'];
         
-        foreach($data as $fila){
-            if($fila['anio_ingreso']==$anio){
-
-                $datoAnio[$fila['sigla_programa']]=(int)$fila['count'];
-                
-            }else{
-                $datoFila = array();
-                foreach($datoAnio as $nombre => $filaAnio){
-                    $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
+            foreach($data as $fila){
+                if($fila['anio_ingreso']!=$anio){
+                    $datoFila = array();
+                    foreach($datoAnio as $nombre => $filaAnio){
+                        $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
+                    }
+                    $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+                    foreach($data2 as $extra){
+                        $datoAnio[$extra['sigla_programa']] = 0;
+                    }
+                    $anio = $fila['anio_ingreso'];
                 }
-                $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
-                foreach($data2 as $extra){
-                    $datoAnio[$extra['sigla_programa']] = 0;
-                }
-                $anio = $fila['anio_ingreso'];
                 $datoAnio[$fila['sigla_programa']]=(int)$fila['count'];
             }
-        }
 
-        $datoFila = array();
-        foreach($datoAnio as $nombre => $filaAnio){
-            $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
-        }
-        $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
-        foreach($data2 as $extra){
-            $datoAnio[$extra['sigla_programa']] = 0;
-        }
+            $datoFila = array();
+            foreach($datoAnio as $nombre => $filaAnio){
+                $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
+            }
+            $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+            foreach($data2 as $extra){
+                $datoAnio[$extra['sigla_programa']] = 0;
+            }
 
-        // $array_out = array("conceptos"=>array());
-        // if(count($data)>0){
-        //     foreach ($data as $concepto) {
-        //         $array_out['conceptos'][] = $concepto['sigla_programa'];
-        //     }
-        // }
-
+            // $array_out = array("conceptos"=>array());
+            // if(count($data)>0){
+            //     foreach ($data as $concepto) {
+            //         $array_out['conceptos'][] = $concepto['sigla_programa'];
+            //     }
+            // }
+        }
+        
         return $respuesta;
         //return $this->formatoConceptos($data);
     }
