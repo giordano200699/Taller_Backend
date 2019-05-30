@@ -515,9 +515,11 @@ class Pago extends CI_Model
 
    }
 
-   public function listarRelacionAlumnos(){
-    //SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm);
-        $query = $this->db->query("SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm)");
+   public function listarRelacionAlumnos($fecha_inicio, $fecha_fin){
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT cod_perm, count(*) from alumno_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."'  GROUP BY(cod_perm)");
         $data = $query->result_array();
         return $data;
    }

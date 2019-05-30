@@ -125,8 +125,13 @@ class ApiController extends REST_Controller {
             }
         }
         public function relacionAlumnos_get(){
-            $array_out = $this->pago->listarRelacionAlumnos();
-            echo json_encode($array_out);
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarRelacionAlumnos($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+            
         }
         public function poblacionEstudiantil_get(){
             $array_out = $this->pago->listarPoblacionEstudiantil();
