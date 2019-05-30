@@ -2,9 +2,6 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-/**
- *
- */
 class Pago extends CI_Model
 {
     function __construct(){
@@ -38,6 +35,12 @@ class Pago extends CI_Model
         }
         $array_out['datasets'][] = $dataset;
         return $array_out;
+    }
+
+    public function listarLeyendaMovilidad (){
+        $query = $this->db->query('SELECT sigla_programa, nom_programa FROM programa GROUP BY sigla_programa, nom_programa ORDER BY sigla_programa, nom_programa');
+        $data = $query->result_array();
+        return $data;
     }
 
     public function listarPorFechasCantidad($fecha_inicio, $fecha_fin, $conceptos){

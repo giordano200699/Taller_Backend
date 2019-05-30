@@ -146,6 +146,11 @@ class ApiController extends REST_Controller {
             echo json_encode($array_out);
         }
 
+        public function leyendaMovilidad_get(){
+            $array_out = $this->pago->listarLeyendaMovilidad();
+            echo json_encode($array_out);
+        }
+
         public function cantidadPorPeriodoAnio_get(){
             $yearStart = $this->get("year_inicio");
             $yearEnd = $this->get("year_fin");
