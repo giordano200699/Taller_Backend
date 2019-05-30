@@ -37,7 +37,7 @@ class Pago extends CI_Model
         return $array_out;
     }
 
-    public function listarLeyendaMovilidad (){
+    public function listarLeyendaDemanda (){
         $query = $this->db->query('SELECT sigla_programa, nom_programa FROM programa GROUP BY sigla_programa, nom_programa ORDER BY sigla_programa, nom_programa');
         $data = $query->result_array();
         return $data;

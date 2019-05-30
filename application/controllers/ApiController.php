@@ -146,8 +146,8 @@ class ApiController extends REST_Controller {
             echo json_encode($array_out);
         }
 
-        public function leyendaMovilidad_get(){
-            $array_out = $this->pago->listarLeyendaMovilidad();
+        public function leyendaDemanda_get(){
+            $array_out = $this->pago->listarLeyendaDemanda();
             echo json_encode($array_out);
         }
 
