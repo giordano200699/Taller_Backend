@@ -551,7 +551,11 @@ class Pago extends CI_Model
             $nombre = $data[0]['sigla_programa'];
             $arregloTipo = array();
             $tipo = $data[0]['cod_perm'];
+
             $arregloAnio = array();
+            for($i=(int)$fecha_inicio;$i<=(int)$fecha_fin;$i++){
+                $arregloAnio[''.$i] = 0;
+            }
             $anio = $data[0]['anio_ingreso'];
 
             $cantidad =$data[0]['cantidad'];
@@ -569,6 +573,9 @@ class Pago extends CI_Model
                 if($tipo!=$fila['cod_perm'] || $fila["sigla_programa"] != $nombre){
                     $arregloTipo[$tipo] = $arregloAnio;
                     $arregloAnio = array();
+                    for($i=(int)$fecha_inicio;$i<=(int)$fecha_fin;$i++){
+                        $arregloAnio[''.$i] = 0;
+                    }
 
                     $tipo = $fila['cod_perm'];
                 }
