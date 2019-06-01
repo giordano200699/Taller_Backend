@@ -594,6 +594,54 @@ class Pago extends CI_Model
         return $data;
    }
 
+   public function listarProgramaAlumnosInverso($fecha_inicio, $fecha_fin){
+        $query = $this->db->query("SELECT anio_ingreso , cod_perm, programa.sigla_programa, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, cod_perm, programa.sigla_programa, n_prioridad ORDER BY anio_ingreso,  cod_perm ,n_prioridad  ;");
+        $data = $query->result_array();
+
+        $contador = 1;
+        $resultado=[];
+        if($data){
+            $resultado = array();
+            $nombre = $data[0]['sigla_programa'];
+            $arregloTipo = array();
+            $tipo = $data[0]['cod_perm'];
+
+            $arregloNombre = array();
+            
+            $anio = $data[0]['anio_ingreso'];
+
+            $cantidad =$data[0]['cantidad'];
+
+            
+            foreach($data as $fila){
+
+                if($nombre!=$fila['sigla_programa'] || $tipo!=$fila['cod_perm'] || $fila["anio_ingreso"] != $anio){
+                    $arregloNombre[$nombre] = (int)$cantidad;
+                    $nombre = $fila['sigla_programa'];
+                    $cantidad = $fila['cantidad'];
+                }
+
+                if($tipo!=$fila['cod_perm'] || $fila["anio_ingreso"] != $anio){
+                    $arregloTipo[$tipo] = $arregloNombre;
+                    $arregloNombre = array();
+
+                    $tipo = $fila['cod_perm'];
+                }
+
+                if($fila["anio_ingreso"] != $anio){
+                    $resultado[$anio] = $arregloTipo;
+                    $arregloTipo = array();
+
+                    $anio = $fila['anio_ingreso'];
+                }              
+                
+            }
+        }
+        return $resultado;
+        return array('contador'=>$contador);
+        return $data;
+   }
+
 }
 
 
