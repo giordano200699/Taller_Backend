@@ -588,6 +588,7 @@ class Pago extends CI_Model
                 }              
                 
             }
+            $resultado[$nombre] = $arregloTipo;
         }
         return $resultado;
         return array('contador'=>$contador);
@@ -636,6 +637,7 @@ class Pago extends CI_Model
                 }              
                 
             }
+            $resultado[$anio] = $arregloTipo;
         }
         return $resultado;
         return array('contador'=>$contador);
