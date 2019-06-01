@@ -37,8 +37,8 @@ class Pago extends CI_Model
         return $array_out;
     }
 
-    public function listarLeyendaMovilidad (){
-        $query = $this->db->query('SELECT sigla_programa, nom_programa FROM programa GROUP BY sigla_programa, nom_programa ORDER BY sigla_programa, nom_programa');
+    public function listarLeyendaDemanda (){
+        $query = $this->db->query('SELECT sigla_programa, nom_programa FROM programa GROUP BY n_prioridad, sigla_programa, nom_programa ORDER BY n_prioridad, nom_programa;');
         $data = $query->result_array();
         return $data;
     }
@@ -480,7 +480,7 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
         
-        $query = $this->db->query("SELECT programa.sigla_programa, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, programa.sigla_programa ORDER BY programa.sigla_programa,anio_ingreso"
+        $query = $this->db->query("SELECT programa.sigla_programa, cod_perm, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, cod_perm, programa.sigla_programa, n_prioridad ORDER BY n_prioridad, cod_perm, anio_ingreso;"
         );
         $data = $query->result_array();
         $programaArray = [];
