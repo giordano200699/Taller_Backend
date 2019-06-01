@@ -542,6 +542,11 @@ class Pago extends CI_Model
         $data = $query->result_array();
         return $data;
    }
+   public function listarProgramaAlumnos($fecha_inicio, $fecha_fin){
+        $query = $this->db->query("SELECT EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y')),count(*) from docente where fech_ingreso IS NOT NULL AND fech_ingreso !='a numa' GROUP BY(EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y'))) ORDER BY(EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y')))");
+        $data = $query->result_array();
+        return $data;
+   }
 
 }
 
