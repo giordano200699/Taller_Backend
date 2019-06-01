@@ -545,7 +545,7 @@ class Pago extends CI_Model
         $data = $query->result_array();
 
         $contador = 1;
-
+        $resultado=[];
         if($data){
             $resultado = array();
             $nombre = $data[0]['sigla_programa'];
