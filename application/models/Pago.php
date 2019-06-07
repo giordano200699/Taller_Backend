@@ -588,6 +588,8 @@ class Pago extends CI_Model
                 }              
                 
             }
+            $arregloAnio[$anio] = (int)$cantidad;
+            $arregloTipo[$tipo] = $arregloAnio;
             $resultado[$nombre] = $arregloTipo;
         }
         return $resultado;
@@ -637,6 +639,8 @@ class Pago extends CI_Model
                 }              
                 
             }
+            $arregloNombre[$nombre] = (int)$cantidad;
+            $arregloTipo[$tipo] = $arregloNombre;
             $resultado[$anio] = $arregloTipo;
         }
         return $resultado;
