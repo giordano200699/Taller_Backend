@@ -520,9 +520,28 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT cod_perm, count(*) from alumno_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."'  GROUP BY(cod_perm)");
+        $query = $this->db->query("SELECT n_prioridad, count(*) from alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."'  GROUP BY(n_prioridad) ORDER BY(n_prioridad)");
+
         $data = $query->result_array();
-        return $data;
+        $arreglo = [];
+        
+        $query2 = $this->db->query("SELECT n_prioridad, sigla_programa from programa");
+        $data2 = $query2->result_array();
+        if($data2){
+            foreach($data2 as $fila2){
+                $arreglo[$fila2["n_prioridad"]]=$fila2["sigla_programa"];
+            }
+        }
+        $resultado = array();
+        if($data){
+            foreach($data as $fila){
+                $datos = [];
+                $datos["cod_perm"] = $arreglo[$fila["n_prioridad"]];
+                $datos["count"] = $fila["count"];
+                array_push($resultado,$datos);
+            }
+        }
+        return $resultado;
    }
 
    
