@@ -502,14 +502,13 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
         
-        $query = $this->db->query("SELECT programa.sigla_programa, cod_perm, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, cod_perm, programa.sigla_programa, n_prioridad ORDER BY n_prioridad, cod_perm, anio_ingreso;"
+        $query = $this->db->query("SELECT programa.sigla_programa, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, programa.sigla_programa ORDER BY programa.sigla_programa,anio_ingreso"
         );
         $data = $query->result_array();
         $programaArray = [];
 
         if($data){
             $nombre = $data[0]["sigla_programa"];
-            $resultado[] = array();
             
 
             for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
@@ -522,7 +521,6 @@ class Pago extends CI_Model
 
                     $nuevoArray[$fila["anio_ingreso"]] = (int)$fila["cantidad"];
                     
-                    //$resultado["sigla_programa"]
                 }else{
                     $programaArray[$nombre] = $nuevoArray;
                     for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
@@ -544,9 +542,28 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT cod_perm, count(*) from alumno_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."'  GROUP BY(cod_perm)");
+        $query = $this->db->query("SELECT n_prioridad, count(*) from alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."'  GROUP BY(n_prioridad) ORDER BY(n_prioridad)");
+
         $data = $query->result_array();
-        return $data;
+        $arreglo = [];
+        
+        $query2 = $this->db->query("SELECT n_prioridad, sigla_programa from programa");
+        $data2 = $query2->result_array();
+        if($data2){
+            foreach($data2 as $fila2){
+                $arreglo[$fila2["n_prioridad"]]=$fila2["sigla_programa"];
+            }
+        }
+        $resultado = array();
+        if($data){
+            foreach($data as $fila){
+                $datos = [];
+                $datos["cod_perm"] = $arreglo[$fila["n_prioridad"]];
+                $datos["count"] = $fila["count"];
+                array_push($resultado,$datos);
+            }
+        }
+        return $resultado;
    }
 
    
@@ -562,6 +579,113 @@ class Pago extends CI_Model
     //SELECT cod_perm, count(*) from alumno_programa GROUP BY(cod_perm);
         $query = $this->db->query("SELECT EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y')),count(*) from docente where fech_ingreso IS NOT NULL AND fech_ingreso !='a numa' GROUP BY(EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y'))) ORDER BY(EXTRACT(YEAR FROM TO_DATE(fech_ingreso,'%d/%m/%Y')))");
         $data = $query->result_array();
+        return $data;
+   }
+   public function listarProgramaAlumnos($fecha_inicio, $fecha_fin){
+        $query = $this->db->query("SELECT programa.sigla_programa, cod_perm, anio_ingreso, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, cod_perm, programa.sigla_programa, n_prioridad ORDER BY n_prioridad, cod_perm, anio_ingreso;");
+        $data = $query->result_array();
+
+        $contador = 1;
+        $resultado=[];
+        if($data){
+            $resultado = array();
+            $nombre = $data[0]['sigla_programa'];
+            $arregloTipo = array();
+            $tipo = $data[0]['cod_perm'];
+
+            $arregloAnio = array();
+            for($i=(int)$fecha_inicio;$i<=(int)$fecha_fin;$i++){
+                $arregloAnio[''.$i] = 0;
+            }
+            $anio = $data[0]['anio_ingreso'];
+
+            $cantidad =$data[0]['cantidad'];
+
+            
+            foreach($data as $fila){
+
+                if($anio!=$fila['anio_ingreso'] || $tipo!=$fila['cod_perm'] || $fila["sigla_programa"] != $nombre){
+                    $contador++;
+                    $arregloAnio[$anio] = (int)$cantidad;
+                    $anio = $fila['anio_ingreso'];
+                    $cantidad = $fila['cantidad'];
+                }
+
+                if($tipo!=$fila['cod_perm'] || $fila["sigla_programa"] != $nombre){
+                    $arregloTipo[$tipo] = $arregloAnio;
+                    $arregloAnio = array();
+                    for($i=(int)$fecha_inicio;$i<=(int)$fecha_fin;$i++){
+                        $arregloAnio[''.$i] = 0;
+                    }
+
+                    $tipo = $fila['cod_perm'];
+                }
+
+                if($fila["sigla_programa"] != $nombre){
+                    $resultado[$nombre] = $arregloTipo;
+                    $arregloTipo = array();
+
+                    $nombre = $fila["sigla_programa"];
+                }              
+                
+            }
+            $arregloAnio[$anio] = (int)$cantidad;
+            $arregloTipo[$tipo] = $arregloAnio;
+            $resultado[$nombre] = $arregloTipo;
+        }
+        return $resultado;
+        return array('contador'=>$contador);
+        return $data;
+   }
+
+   public function listarProgramaAlumnosInverso($fecha_inicio, $fecha_fin){
+        $query = $this->db->query("SELECT anio_ingreso , cod_perm, programa.sigla_programa, COUNT(cod_alumno) as cantidad FROM alumno_programa INNER JOIN programa ON programa.id_programa = alumno_programa.id_programa WHERE CHAR_LENGTH(anio_ingreso) <=4 AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso, cod_perm, programa.sigla_programa, n_prioridad ORDER BY anio_ingreso,  cod_perm ,n_prioridad  ;");
+        $data = $query->result_array();
+
+        $contador = 1;
+        $resultado=[];
+        if($data){
+            $resultado = array();
+            $nombre = $data[0]['sigla_programa'];
+            $arregloTipo = array();
+            $tipo = $data[0]['cod_perm'];
+
+            $arregloNombre = array();
+            
+            $anio = $data[0]['anio_ingreso'];
+
+            $cantidad =$data[0]['cantidad'];
+
+            
+            foreach($data as $fila){
+
+                if($nombre!=$fila['sigla_programa'] || $tipo!=$fila['cod_perm'] || $fila["anio_ingreso"] != $anio){
+                    $arregloNombre[$nombre] = (int)$cantidad;
+                    $nombre = $fila['sigla_programa'];
+                    $cantidad = $fila['cantidad'];
+                }
+
+                if($tipo!=$fila['cod_perm'] || $fila["anio_ingreso"] != $anio){
+                    $arregloTipo[$tipo] = $arregloNombre;
+                    $arregloNombre = array();
+
+                    $tipo = $fila['cod_perm'];
+                }
+
+                if($fila["anio_ingreso"] != $anio){
+                    $resultado[$anio] = $arregloTipo;
+                    $arregloTipo = array();
+
+                    $anio = $fila['anio_ingreso'];
+                }              
+                
+            }
+            $arregloNombre[$nombre] = (int)$cantidad;
+            $arregloTipo[$tipo] = $arregloNombre;
+            $resultado[$anio] = $arregloTipo;
+        }
+        return $resultado;
+        return array('contador'=>$contador);
         return $data;
    }
 
