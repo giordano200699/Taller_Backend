@@ -417,6 +417,28 @@ class Pago extends CI_Model
         return $array_out;
     }
 
+    public function listarBeneficio($fecha_inicio, $fecha_fin) {
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT tipo, COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo ORDER BY tipo"
+        );
+        $data = $query->result_array();
+        return $data;
+    }
+
+    public function listarBeneficioExtendido($fecha_inicio, $fecha_fin) {
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio INNER JOIN alumno_programa ON alumno_programa.cod_alumno=alumno_programa_beneficio.cod_alumno WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno ORDER BY tipo"
+        );
+        $data = $query->result_array();
+        return $data;
+    }
+
+
+
     public function listarProgramaXAnios($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
