@@ -437,7 +437,14 @@ class Pago extends CI_Model
         return $data;
     }
 
+    public function listarEstadoAlumno($fecha_inicio, $fecha_fin) {
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
 
+        $query = $this->db->query("SELECT SUBSTRING(anio_ingreso, 1, 4), ecivil_desc, COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int >='".$fecha_inicio."' AND CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int <='".$fecha_fin."' GROUP BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc ORDER BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc");
+        $data = $query->result_array();
+        return $data;
+    }
 
     public function listarProgramaXAnios($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
