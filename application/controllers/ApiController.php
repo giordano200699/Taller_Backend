@@ -125,9 +125,18 @@ class ApiController extends REST_Controller {
             }
         }
 
-        public function beneficioExtendido_get(){
+        public function graficoBeneficio_get(){
             if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
-                $array_out = $this->pago->listarBeneficioExtendido($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                $array_out = $this->pago->listarBenefiocioGrafica($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+        }
+
+        public function beneficioExtendido_get(){
+            if($this->get("anio")&& $this->get("tipoId")){
+                $array_out = $this->pago->listarBeneficioExtendido($this->get("anio"),$this->get("tipoId"));
                 echo json_encode($array_out);
             }else{
                 echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
@@ -137,6 +146,15 @@ class ApiController extends REST_Controller {
         public function estadoAlumno_get(){
             if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
                 $array_out = $this->pago->listarEstadoAlumno($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+        }
+
+        public function alumnoFallecido_get(){
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarEstadoAlumnoFallecido($this->get("fecha_inicio"),$this->get("fecha_fin"));
                 echo json_encode($array_out);
             }else{
                 echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");

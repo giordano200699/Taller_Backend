@@ -421,17 +421,89 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT tipo, COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo ORDER BY tipo"
+        $query = $this->db->query("SELECT tipo, extract(year from fecha) AS anio, COUNT(cod_alumno) AS cantidad FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo, extract(year from fecha) ORDER BY tipo, extract(year from fecha)"
         );
         $data = $query->result_array();
-        return $data;
+        $programaArray = [];
+
+        if($data){
+            $nombre = $data[0]["tipo"];
+            for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                $nuevoArray["$i"] = 0;
+                
+            }
+            foreach($data as $fila){
+                if($fila["tipo"] == $nombre){
+                    $nuevoArray[$fila["anio"]] = (int)$fila["cantidad"];
+                }else{
+                    $programaArray[$nombre] = $nuevoArray;
+                    for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                        $nuevoArray["$i"] = 0;
+                    }
+                    $nombre = $fila["tipo"];
+                    $nuevoArray[$fila["anio"]] = (int)$fila["cantidad"];
+                }
+            }
+            $programaArray[$nombre] = $nuevoArray;
+        }
+        return $programaArray;  
     }
 
-    public function listarBeneficioExtendido($fecha_inicio, $fecha_fin) {
+
+    public function listarBenefiocioGrafica($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio INNER JOIN alumno_programa ON alumno_programa.cod_alumno=alumno_programa_beneficio.cod_alumno WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno ORDER BY tipo"
+        $query = $this->db->query("SELECT extract(year from fecha) as anio, tipo, COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY extract(year from fecha), tipo ORDER BY extract(year from fecha), tipo"
+        );
+        $data = $query->result_array();
+
+        $query2 = $this->db->query("SELECT tipo FROM beneficio;");
+        $data2 = $query2->result_array();
+        
+
+        $datoAnio = array();
+
+        foreach($data2 as $fila){
+            $datoAnio[$fila['tipo']] = 0;
+        }        
+
+        $respuesta = array();
+        if($data){
+            $anio = $data[0]['anio'];
+        
+            foreach($data as $fila){
+                if($fila['anio']!=$anio){
+                    $datoFila = array();
+                    foreach($datoAnio as $nombre => $filaAnio){
+                        $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
+                    }
+                    $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+                    foreach($data2 as $extra){
+                        $datoAnio[$extra['tipo']] = 0;
+                    }
+                    $anio = $fila['anio'];
+                }
+                $datoAnio[$fila['tipo']]=(int)$fila['count'];
+            }
+
+            $datoFila = array();
+            foreach($datoAnio as $nombre => $filaAnio){
+                $datoFila[] = array("label"=>$nombre,"y"=>$filaAnio);
+            }
+            $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+            foreach($data2 as $extra){
+                $datoAnio[$extra['tipo']] = 0;
+            }
+        }
+        return $respuesta;
+    }
+
+    public function listarBeneficioExtendido($anio, $tipoId) {
+        $anio = (int)$anio;
+        $tipoId = (int)$tipoId;
+
+        $query = $this->db->query("SELECT tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio INNER JOIN alumno_programa ON alumno_programa.cod_alumno=alumno_programa_beneficio.cod_alumno WHERE extract(year from fecha)='".$anio."' AND beneficio.id_beneficio='".$tipoId."' GROUP BY tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil ORDER BY tipo"
         );
         $data = $query->result_array();
         return $data;
@@ -441,7 +513,40 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT SUBSTRING(anio_ingreso, 1, 4), ecivil_desc, COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int >='".$fecha_inicio."' AND CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int <='".$fecha_fin."' GROUP BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc ORDER BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc");
+        $query = $this->db->query("SELECT ecivil_desc, SUBSTRING(anio_ingreso, 1, 4), COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int >='".$fecha_inicio."' AND CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int <='".$fecha_fin."' GROUP BY ecivil_desc, SUBSTRING(anio_ingreso, 1, 4) ORDER BY ecivil_desc, SUBSTRING(anio_ingreso, 1, 4)"
+        );
+        $data = $query->result_array();
+        $programaArray = [];
+
+        if($data){
+            $nombre = $data[0]["tipo"];
+            for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                $nuevoArray["$i"] = 0;
+                
+            }
+            foreach($data as $fila){
+                if($fila["tipo"] == $nombre){
+                    $nuevoArray[$fila["anio"]] = (int)$fila["cantidad"];
+                }else{
+                    $programaArray[$nombre] = $nuevoArray;
+                    for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                        $nuevoArray["$i"] = 0;
+                    }
+                    $nombre = $fila["tipo"];
+                    $nuevoArray[$fila["anio"]] = (int)$fila["cantidad"];
+                }
+            }
+            $programaArray[$nombre] = $nuevoArray;
+        }
+        return $programaArray;  
+    }
+
+    public function listarEstadoAlumnoFallecido($fecha_inicio, $fecha_fin){
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT anio_ingreso, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE estado_civil.ecivil_id='4' AND anio_ingreso>='".$fecha_inicio."'AND anio_ingreso<='".$fecha_fin."' ORDER BY anio_ingreso"
+        );
         $data = $query->result_array();
         return $data;
     }
@@ -450,7 +555,7 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT anio_ingreso,programa.sigla_programa, count(*) FROM alumno_programa inner join programa on alumno_programa.id_programa=programa.id_programa WHERE anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso,programa.id_programa ORDER BY anio_ingreso,programa.id_programa;"
+        $query = $this->db->query("SELECT anio_ingreso, programa.sigla_programa, count(*) FROM alumno_programa inner join programa on alumno_programa.id_programa=programa.id_programa WHERE anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' GROUP BY anio_ingreso,programa.id_programa ORDER BY anio_ingreso,programa.id_programa;"
         );
         $data = $query->result_array();
 
