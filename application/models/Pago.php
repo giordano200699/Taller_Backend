@@ -475,9 +475,9 @@ class Pago extends CI_Model
                 if($fila['date_part']!=$anio){
                     $datoFila = array();
                     foreach($datoAnio as $nombre => $filaAnio){
-                        $datoFila[] = array("label"=>substr($nombre,0,3),"y"=>$filaAnio);
+                        $datoFila[] = array("label"=>strtoupper(substr($nombre,0,3)),"y"=>$filaAnio);
                     }
-                    $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+                    $respuesta[]=array("type"=>'column',"anio"=>$anio,"dataPoints"=>$datoFila);
                     foreach($data2 as $extra){
                         $datoAnio[$extra['tipo']] = 0;
                     }
@@ -488,19 +488,12 @@ class Pago extends CI_Model
 
             $datoFila = array();
             foreach($datoAnio as $nombre => $filaAnio){
-                $datoFila[] = array("label"=>substr($nombre,0,3),"y"=>$filaAnio);
+                $datoFila[] = array("label"=>strtoupper(substr($nombre,0,3)),"y"=>$filaAnio);
             }
-            $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+            $respuesta[]=array("type"=>'column',"anio"=>$anio,"dataPoints"=>$datoFila);
             foreach($data2 as $extra){
                 $datoAnio[$extra['tipo']] = 0;
             }
-
-            // $array_out = array("conceptos"=>array());
-            // if(count($data)>0){
-            //     foreach ($data as $concepto) {
-            //         $array_out['conceptos'][] = $concepto['sigla_programa'];
-            //     }
-            // }
         }
         
         return $respuesta;
@@ -516,14 +509,87 @@ class Pago extends CI_Model
         return $data;
     }
 
-    public function listarEstadoAlumno($fecha_inicio, $fecha_fin) {
+    public function listarEstadoAlumno($fecha_inicio, $fecha_fin) { 
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+        $query = $this->db->query("SELECT ecivil_desc as tipo, anio_ingreso,COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE (anio_ingreso!='null') AND CHAR_LENGTH(anio_ingreso)='4' AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<= '".$fecha_fin."' GROUP BY ecivil_desc, anio_ingreso ORDER BY ecivil_desc, anio_ingreso");
+        $data = $query->result_array();
+
+        if(count($data)>0){
+
+            $tipo = $data[0]["tipo"];
+            $resultado = [];
+            for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                $nuevoArray["$i"] = 0;
+                
+            }
+            foreach ($data as $key =>$linea ) {
+                if($tipo!=$linea["tipo"]){
+                    $resultado[] = array("tipo"=>$tipo,"anios"=>$nuevoArray);
+                    for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                        $nuevoArray["$i"] = 0;
+                    }
+                    $tipo=$linea["tipo"];
+
+                }
+                $nuevoArray["".$linea["anio_ingreso"]] = $linea["count"];
+            }
+            $resultado[] = array("tipo"=>$tipo,"anios"=>$nuevoArray);
+            return $resultado;
+        }
+        
+        return $data;
+
+    }
+
+    public function listarEstadoAlumnoGrafica($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT SUBSTRING(anio_ingreso, 1, 4), ecivil_desc, COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int >='".$fecha_inicio."' AND CASE WHEN (anio_ingreso!='null') THEN SUBSTRING(anio_ingreso, 1, 4)END::int <='".$fecha_fin."' GROUP BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc ORDER BY SUBSTRING(anio_ingreso, 1, 4), ecivil_desc");
+        $query = $this->db->query("SELECT  anio_ingreso,ecivil_desc as tipo,COUNT(cod_alumno) FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE (anio_ingreso!='null') AND CHAR_LENGTH(anio_ingreso)='4' AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<= '".$fecha_fin."' GROUP BY ecivil_desc, anio_ingreso ORDER BY  anio_ingreso,ecivil_desc");
         $data = $query->result_array();
-        return $data;
+
+        $query2 = $this->db->query("SELECT ecivil_desc as tipo from estado_civil");
+        $data2 = $query2->result_array();        
+
+        $datoAnio = array();
+
+        foreach($data2 as $fila){
+            $datoAnio[$fila['tipo']] = 0;
+        }        
+
+        $respuesta = array();
+        if($data){
+            $anio = $data[0]['anio_ingreso'];
+        
+            foreach($data as $fila){
+                if($fila['anio_ingreso']!=$anio){
+                    $datoFila = array();
+                    foreach($datoAnio as $nombre => $filaAnio){
+                        $datoFila[] = array("label"=>strtoupper(substr($nombre,0,3)),"y"=>$filaAnio);
+                    }
+                    $respuesta[]=array("type"=>'column',"anio"=>$anio,"dataPoints"=>$datoFila);
+                    foreach($data2 as $extra){
+                        $datoAnio[$extra['tipo']] = 0;
+                    }
+                    $anio = $fila['anio_ingreso'];
+                }
+                $datoAnio[$fila['tipo']]=(int)$fila['count'];
+            }
+
+            $datoFila = array();
+            foreach($datoAnio as $nombre => $filaAnio){
+                $datoFila[] = array("label"=>strtoupper(substr($nombre,0,3)),"y"=>$filaAnio);
+            }
+            $respuesta[]=array("type"=>'column',"anio"=>$anio,"dataPoints"=>$datoFila);
+            foreach($data2 as $extra){
+                $datoAnio[$extra['tipo']] = 0;
+            }
+        }
+        
+        return $respuesta;
     }
+
 
     public function listarProgramaXAnios($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
