@@ -116,6 +116,33 @@ class ApiController extends REST_Controller {
             }
         }
 
+        public function beneficio_get(){
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarBeneficio($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+        }
+
+        public function beneficioExtendido_get(){
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarBeneficioExtendido($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+        }
+
+        public function estadoAlumno_get(){
+            if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
+                $array_out = $this->pago->listarEstadoAlumno($this->get("fecha_inicio"),$this->get("fecha_fin"));
+                echo json_encode($array_out);
+            }else{
+                echo("Faltan algunos de los datos de la fecha_inicio o fecha_fin");
+            }
+        }
+
         public function demandaSocial_get(){
             if($this->get("fecha_inicio")&& $this->get("fecha_fin")){
                 $array_out = $this->pago->listarDemandaSocial($this->get("fecha_inicio"),$this->get("fecha_fin"));
