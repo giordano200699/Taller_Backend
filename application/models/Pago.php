@@ -447,11 +447,63 @@ class Pago extends CI_Model
             return $resultado;
         }
         
-
-
-        
-
         return $data;
+    }
+
+    public function listarBeneficioGrafica($fecha_inicio, $fecha_fin){
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT extract(year from fecha),tipo, COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY extract(year from fecha),tipo ORDER BY extract(year from fecha),tipo"
+        );
+        $data = $query->result_array();
+
+        $query2 = $this->db->query("SELECT tipo from beneficio");
+        $data2 = $query2->result_array();        
+
+        $datoAnio = array();
+
+        foreach($data2 as $fila){
+            $datoAnio[$fila['tipo']] = 0;
+        }        
+
+        $respuesta = array();
+        if($data){
+            $anio = $data[0]['date_part'];
+        
+            foreach($data as $fila){
+                if($fila['date_part']!=$anio){
+                    $datoFila = array();
+                    foreach($datoAnio as $nombre => $filaAnio){
+                        $datoFila[] = array("label"=>substr($nombre,0,3),"y"=>$filaAnio);
+                    }
+                    $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+                    foreach($data2 as $extra){
+                        $datoAnio[$extra['tipo']] = 0;
+                    }
+                    $anio = $fila['date_part'];
+                }
+                $datoAnio[$fila['tipo']]=(int)$fila['count'];
+            }
+
+            $datoFila = array();
+            foreach($datoAnio as $nombre => $filaAnio){
+                $datoFila[] = array("label"=>substr($nombre,0,3),"y"=>$filaAnio);
+            }
+            $respuesta[]=array("type"=>'column',"dataPoints"=>$datoFila);
+            foreach($data2 as $extra){
+                $datoAnio[$extra['tipo']] = 0;
+            }
+
+            // $array_out = array("conceptos"=>array());
+            // if(count($data)>0){
+            //     foreach ($data as $concepto) {
+            //         $array_out['conceptos'][] = $concepto['sigla_programa'];
+            //     }
+            // }
+        }
+        
+        return $respuesta;
     }
 
     public function listarBeneficioExtendido($fecha_inicio, $fecha_fin) {
