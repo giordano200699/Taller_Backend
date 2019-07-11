@@ -421,9 +421,36 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT tipo, COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo ORDER BY tipo"
+        $query = $this->db->query("SELECT tipo,extract(year from fecha), COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo,extract(year from fecha) ORDER BY tipo,extract(year from fecha)"
         );
         $data = $query->result_array();
+        if(count($data)>0){
+
+            $tipo = $data[0]["tipo"];
+            $resultado = [];
+            for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                $nuevoArray["$i"] = 0;
+                
+            }
+            foreach ($data as $key =>$linea ) {
+                if($tipo!=$linea["tipo"]){
+                    $resultado[] = array("tipo"=>$tipo,"anios"=>$nuevoArray);
+                    for($i=$fecha_inicio;$i<=$fecha_fin;$i++){
+                        $nuevoArray["$i"] = 0;
+                    }
+                    $tipo=$linea["tipo"];
+
+                }
+                $nuevoArray["".$linea["date_part"]] = $linea["count"];
+            }
+            $resultado[] = array("tipo"=>$tipo,"anios"=>$nuevoArray);
+            return $resultado;
+        }
+        
+
+
+        
+
         return $data;
     }
 
