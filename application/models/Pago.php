@@ -591,6 +591,15 @@ class Pago extends CI_Model
         return $respuesta;
     }
 
+    public function listarEstadoAlumnoFallecido($fecha_inicio, $fecha_fin) {
+        $fecha_inicio = (int)$fecha_inicio;
+        $fecha_fin = (int)$fecha_fin;
+
+        $query = $this->db->query("SELECT anio_ingreso, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil FROM alumno_programa INNER JOIN estado_civil ON alumno_programa.ecivil_id=estado_civil.ecivil_id WHERE estado_civil.ecivil_id='4' AND anio_ingreso>='".$fecha_inicio."' AND anio_ingreso<='".$fecha_fin."' "
+        );
+        $data = $query->result_array();
+        return $data;
+    }
 
     public function listarProgramaXAnios($fecha_inicio, $fecha_fin){
         $fecha_inicio = (int)$fecha_inicio;
