@@ -421,7 +421,7 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT alumno_programa_beneficio.id_beneficio as id ,tipo,extract(year from fecha), COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo,extract(year from fecha) ORDER BY tipo,extract(year from fecha)"
+        $query = $this->db->query("SELECT alumno_programa_beneficio.id_beneficio as id ,tipo,extract(year from fecha), COUNT(cod_alumno) FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio WHERE extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY alumno_programa_beneficio.id_beneficio,tipo,extract(year from fecha) ORDER BY alumno_programa_beneficio.id_beneficio,tipo,extract(year from fecha)"
         );
         $data = $query->result_array();
         if(count($data)>0){
