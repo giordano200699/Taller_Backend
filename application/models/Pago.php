@@ -504,7 +504,7 @@ class Pago extends CI_Model
         $fecha_inicio = (int)$fecha_inicio;
         $fecha_fin = (int)$fecha_fin;
 
-        $query = $this->db->query("SELECT tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio INNER JOIN alumno_programa ON alumno_programa.cod_alumno=alumno_programa_beneficio.cod_alumno WHERE AND beneficio.id_beneficio='".$beneficado_id."' AND extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil ORDER BY tipo "
+        $query = $this->db->query("SELECT tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil FROM alumno_programa_beneficio INNER JOIN beneficio ON beneficio.id_beneficio=alumno_programa_beneficio.id_beneficio INNER JOIN alumno_programa ON alumno_programa.cod_alumno=alumno_programa_beneficio.cod_alumno WHERE beneficio.id_beneficio='".$beneficado_id."' AND extract(year from fecha)>='".$fecha_inicio."' AND extract(year from fecha)<='".$fecha_fin."' GROUP BY tipo, alumno_programa.cod_alumno, ape_paterno, ape_materno, nom_alumno, dni_m, correo, correo_personal, telefono_movil ORDER BY tipo "
         );
         $data = $query->result_array();
         return $data;
